@@ -7,4 +7,3 @@ const config = {
 };
 
 const net = new NeuralNetwork(config);
-console.log(net.layers);
