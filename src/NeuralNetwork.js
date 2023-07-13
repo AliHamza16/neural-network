@@ -1,3 +1,5 @@
+import { sigmoid } from './activations/sigmoid.js';
+
 export class NeuralNetwork {
     constructor({
         inputSize,
@@ -7,11 +9,14 @@ export class NeuralNetwork {
         activation = 'sigmoid',
         log = false,
     }) {
+        const activations = {
+            sigmoid,
+        };
         this.inputSize = inputSize;
         this.outputSize = outputSize;
         this.hiddenLayers = hiddenLayers;
         this.learningRate = learningRate;
-        this.activation = activation;
+        this.activation = activations[activation];
         this.log = log;
         this.weights = [];
         this.biases = [];
@@ -50,6 +55,18 @@ export class NeuralNetwork {
         this.layers.slice(1, this.layers.length).forEach((layer, i) => {
             layer.forEach((neuron, j) => {
                 this.biases[i][j] = Math.random() * 2 - 1;
+            });
+        });
+    }
+    feedForward(inputs) {
+        this.layers[0] = inputs;
+        this.layers.slice(1, this.layers.length).forEach((layer, i) => {
+            layer.forEach((neuron, j) => {
+                this.layers[i + 1][j] = this.activation(
+                    this.layers[i].reduce((a, c, k) => {
+                        return a + c * this.weights[i][k][j];
+                    }, this.biases[i][j]),
+                );
             });
         });
     }
