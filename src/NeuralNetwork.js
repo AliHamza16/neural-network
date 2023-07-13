@@ -1,4 +1,4 @@
-import { sigmoid } from './activations/sigmoid.js';
+import { sigmoid, sigmoidDerivative } from './activations/sigmoid.js';
 
 export class NeuralNetwork {
     constructor({
@@ -8,16 +8,22 @@ export class NeuralNetwork {
         learningRate = 0.02,
         activation = 'sigmoid',
         log = false,
+        iterations = 2000,
     }) {
         const activations = {
             sigmoid,
+        };
+        const derivatives = {
+            sigmoidDerivative,
         };
         this.inputSize = inputSize;
         this.outputSize = outputSize;
         this.hiddenLayers = hiddenLayers;
         this.learningRate = learningRate;
         this.activation = activations[activation];
+        this.derivative = derivatives[`${activation}Derivative`];
         this.log = log;
+        this.iterations = iterations;
         this.weights = [];
         this.biases = [];
         this.handleLayers();
@@ -69,5 +75,13 @@ export class NeuralNetwork {
                 );
             });
         });
+    }
+    MSE(predictedValues, actualValues) {
+        return (
+            (1 / n) *
+            predictedValues.reduce((a, c, i) => {
+                return a + (c - actualValues[i]) ** 2;
+            }, 0)
+        );
     }
 }
