@@ -1,0 +1,12 @@
+{
+    "name": "neural-network",
+    "version": "1.0.0",
+    "description": "Neural Network",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "alihamza",
+    "license": "ISC"
+}
