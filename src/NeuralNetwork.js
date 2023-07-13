@@ -30,28 +30,24 @@ export class NeuralNetwork {
     }
     handleLayers() {
         this.layers = [
-            new Array(this.inputSize).fill(null),
-            ...this.hiddenLayers.map((n) => new Array(n).fill(null)),
-            new Array(this.outputSize).fill(null),
+            new Array(this.inputSize).fill(null).map(() => {
+                return { value: null, weights: [] };
+            }),
+            ...this.hiddenLayers.map((n) =>
+                new Array(n).fill(null).map(() => {
+                    return { value: null, weights: [], bias: null };
+                }),
+            ),
+            new Array(this.outputSize).fill(null).map(() => {
+                return { value: null, bias: null };
+            }),
         ];
-        this.layers.slice(0, this.layers.length - 1).forEach((layer, i) => {
-            this.weights[i] = [];
-            layer.forEach((neuron, j) => {
-                this.weights[i][j] = [];
-            });
-        });
-        this.layers.slice(1, this.layers.length).forEach((layer, i) => {
-            this.biases[i] = [];
-            layer.forEach((neuron, j) => {
-                this.biases[i][j] = [];
-            });
-        });
         this.randomBrain();
     }
     randomBrain() {
         this.layers.slice(0, this.layers.length - 1).forEach((layer, i) => {
             layer.forEach((neuron, j) => {
-                this.weights[i][j] = new Array(this.layers[i + 1].length)
+                neuron.weights = new Array(this.layers[i + 1].length)
                     .fill(null)
                     .map(() => {
                         return Math.random() * 2 - 1;
@@ -60,18 +56,20 @@ export class NeuralNetwork {
         });
         this.layers.slice(1, this.layers.length).forEach((layer, i) => {
             layer.forEach((neuron, j) => {
-                this.biases[i][j] = Math.random() * 2 - 1;
+                neuron.bias = Math.random() * 2 - 1;
             });
         });
     }
     feedForward(inputs) {
-        this.layers[0] = inputs;
+        this.layers[0] = inputs.map((input, i) => {
+            return { ...this.layers[0][i], value: input };
+        });
         this.layers.slice(1, this.layers.length).forEach((layer, i) => {
             layer.forEach((neuron, j) => {
-                this.layers[i + 1][j] = this.activation(
+                neuron.value = this.activation(
                     this.layers[i].reduce((a, c, k) => {
-                        return a + c * this.weights[i][k][j];
-                    }, this.biases[i][j]),
+                        return a + c.value * c.weights[j];
+                    }, neuron.bias),
                 );
             });
         });
@@ -83,5 +81,8 @@ export class NeuralNetwork {
                 return a + (c - actualValues[i]) ** 2;
             }, 0)
         );
+    }
+    derivativeMSE(predictedValues, actualValues, i = 0) {
+        return 2 / n;
     }
 }
