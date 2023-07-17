@@ -1,31 +1,50 @@
 import { sigmoid, sigmoidDerivative } from './activations/sigmoid.js';
+import { relu, reluDerivative } from './activations/relu.js';
+import { MSE, derivativeMSE } from './lossFunctions/mse.js';
+
+const activations = {
+    sigmoid,
+    relu,
+};
+
+const derivatives = {
+    sigmoidDerivative,
+    reluDerivative,
+};
+
+const lossFunctions = {
+    MSE,
+};
+
+const derivativeLossFunctions = {
+    derivativeMSE,
+};
 
 export class NeuralNetwork {
     constructor({
         inputSize,
         outputSize,
         hiddenLayers,
+        outputActivation,
         learningRate = 0.02,
-        activation = 'sigmoid',
+        activation = 'relu',
         log = false,
         iterations = 2000,
+        loss = 'MSE',
     }) {
-        const activations = {
-            sigmoid,
-        };
-        const derivatives = {
-            sigmoidDerivative,
-        };
         this.inputSize = inputSize;
         this.outputSize = outputSize;
         this.hiddenLayers = hiddenLayers;
+        this.outputActivation = activations[outputActivation];
+        this.derivativeOutputActivation =
+            derivatives[`${outputActivation}Derivative`];
         this.learningRate = learningRate;
         this.activation = activations[activation];
         this.derivative = derivatives[`${activation}Derivative`];
         this.log = log;
         this.iterations = iterations;
-        this.weights = [];
-        this.biases = [];
+        this.loss = lossFunctions[loss];
+        this.lossDerivative = derivativeLossFunctions[`derivative${loss}`];
         this.handleLayers();
     }
     handleLayers() {
@@ -35,11 +54,22 @@ export class NeuralNetwork {
             }),
             ...this.hiddenLayers.map((n) =>
                 new Array(n).fill(null).map(() => {
-                    return { value: null, weights: [], bias: null };
+                    return {
+                        value: null,
+                        a: null,
+                        weights: [],
+                        bias: null,
+                        activation: this.activation,
+                    };
                 }),
             ),
             new Array(this.outputSize).fill(null).map(() => {
-                return { value: null, bias: null };
+                return {
+                    value: null,
+                    a: null,
+                    bias: null,
+                    activation: this.outputActivation,
+                };
             }),
         ];
         this.randomBrain();
@@ -60,29 +90,27 @@ export class NeuralNetwork {
             });
         });
     }
-    feedForward(inputs) {
-        this.layers[0] = inputs.map((input, i) => {
-            return { ...this.layers[0][i], value: input };
-        });
+    #feedForward() {
         this.layers.slice(1, this.layers.length).forEach((layer, i) => {
             layer.forEach((neuron, j) => {
-                neuron.value = this.activation(
-                    this.layers[i].reduce((a, c, k) => {
-                        return a + c.value * c.weights[j];
-                    }, neuron.bias),
-                );
+                neuron.value = this.layers[i].reduce((a, c, k) => {
+                    return a + (i == 0 ? c.value : c.a) * c.weights[j];
+                }, neuron.bias);
+                neuron.a = neuron.activation
+                    ? neuron.activation(neuron.value)
+                    : neuron.value;
             });
         });
     }
-    MSE(predictedValues, actualValues) {
-        return (
-            (1 / n) *
-            predictedValues.reduce((a, c, i) => {
-                return a + (c - actualValues[i]) ** 2;
-            }, 0)
-        );
+    run(inputs) {
+        this.layers[0] = inputs.map((input, i) => {
+            return { ...this.layers[0][i], value: input };
+        });
+        this.#feedForward();
+        return this.layers.at(-1);
     }
-    derivativeMSE(predictedValues, actualValues, i = 0) {
-        return 2 / n;
+
+    train(trainingData) {
+        // todo
     }
 }
