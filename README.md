@@ -31,31 +31,31 @@ const config = {
 }
 ```
 
-### inputSize
+### **inputSize**
 Determines how many input neurons will be in the neural network
 
-### outputSize
+### **outputSize**
 Determines how many output neurons will be in the neural network
 
-### hiddenLayers
+### **hiddenLayers**
 Gets an array specifying how many neurons will be in each hidden layer
 
-### activation
+### **activation**
 Determines according to which activation function the neurons in hidden layers will be activated
 
-### outputActivation
+### **outputActivation**
 Determines according to which activation function the output neurons are activated
 
-### learningRate
+### **learningRate**
 The amount that the weights are updated during training
 
 > **Note**: A learning rate that is too large can cause the model to converge too quickly to a suboptimal solution, whereas a learning rate that is too small can cause the process to get stuck.
 
-### log
+### **log**
 Determines whether the error of the iterations and the current iteration number are printed to the console
 
-### iterations
+### **iterations**
 Determines how many iterations to do when the model trains itself
 
-### loss
+### **loss**
 Loss function for neural network
